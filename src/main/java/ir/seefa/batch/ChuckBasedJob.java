@@ -14,6 +14,8 @@ import org.springframework.core.io.FileSystemResource;
 import ir.seefa.model.Music;
 import ir.seefa.mappper.MusicFieldSetMapper;
 
+import java.util.concurrent.atomic.AtomicInteger;
+
 /**
  * @author Saman Delfani
  * @version 1.0
@@ -24,7 +26,8 @@ public class ChuckBasedJob {
 
     private final JobBuilderFactory jobBuilderFactory;
     private final StepBuilderFactory stepBuilderFactory;
-    public static String[] tokens = new String[]{"artist.familiarity","artist.hotttnesss","artist.id","artist.latitude","artist.location","artist.longitude","artist.name","artist.similar","artist.terms","artist.terms_freq","release.id","release.name","song.artist_mbtags","song.artist_mbtags_count","song.bars_confidence","song.bars_start","song.beats_confidence","song.beats_start","song.duration","song.end_of_fade_in","song.hotttnesss","song.id","song.key","song.key_confidence","song.loudness","song.mode","song.mode_confidence","song.start_of_fade_out","song.tatums_confidence","song.tatums_start","song.tempo","song.time_signature","song.time_signature_confidence","song.title","song.year"};
+    public static String[] tokens = new String[]{"artist.familiarity", "artist.hotttnesss", "artist.id", "artist.latitude", "artist.location", "artist.longitude", "artist.name", "artist.similar", "artist.terms", "artist.terms_freq", "release.id", "release.name", "song.artist_mbtags", "song.artist_mbtags_count", "song.bars_confidence", "song.bars_start", "song.beats_confidence", "song.beats_start", "song.duration", "song.end_of_fade_in", "song.hotttnesss", "song.id", "song.key", "song.key_confidence", "song.loudness", "song.mode", "song.mode_confidence", "song.start_of_fade_out", "song.tatums_confidence", "song.tatums_start", "song.tempo", "song.time_signature", "song.time_signature_confidence", "song.title", "song.year"};
+    private AtomicInteger numberOfMusics = new AtomicInteger();
 
     public ChuckBasedJob(JobBuilderFactory jobBuilderFactory, StepBuilderFactory stepBuilderFactory) {
         this.jobBuilderFactory = jobBuilderFactory;
@@ -54,8 +57,10 @@ public class ChuckBasedJob {
                 .<Music, Music>chunk(10)
                 .reader(itemReader())
                 .writer(items -> {
-                    System.out.printf("Received list of music size %d%n", items.size());
+                    numberOfMusics.getAndAdd(items.size());
+//                    System.out.printf("Received list of music size %d%n", items.size());
                     items.forEach(System.out::println);
+                    System.out.println("Number of Musics: " + numberOfMusics.get());
                 })
                 .build();
     }
